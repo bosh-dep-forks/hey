@@ -54,6 +54,7 @@ type report struct {
 	errorDist      map[string]int
 	statusCodeDist map[int]int
 	lats           []float64
+	startTimes     []time.Time
 	sizeTotal      int64
 	numRes         int64
 	output         string
@@ -86,6 +87,8 @@ func runReporter(r *report) {
 		if res.err != nil {
 			r.errorDist[res.err.Error()]++
 		} else {
+			r.startTimes = append(r.startTimes, res.startTime)
+			r.lats = append(r.lats, res.duration.Seconds())
 			r.avgTotal += res.duration.Seconds()
 			r.avgConn += res.connDuration.Seconds()
 			r.avgDelay += res.delayDuration.Seconds()
@@ -123,10 +126,10 @@ func (r *report) finalize(total time.Duration) {
 }
 
 func (r *report) printCSV() {
-	r.printf("response-time,DNS+dialup,DNS,Request-write,Response-delay,Response-read\n")
+	r.printf("start-time,response-time,DNS+dialup,DNS,Request-write,Response-delay,Response-read\n")
 	for i, val := range r.lats {
-		r.printf("%4.4f,%4.4f,%4.4f,%4.4f,%4.4f,%4.4f\n",
-			val, r.connLats[i], r.dnsLats[i], r.reqLats[i], r.delayLats[i], r.resLats[i])
+		r.printf("%s,%4.4f,%4.4f,%4.4f,%4.4f,%4.4f,%4.4f\n",
+			r.startTimes[i].UTC().Format(time.RFC3339Nano), val, r.connLats[i], r.dnsLats[i], r.reqLats[i], r.delayLats[i], r.resLats[i])
 	}
 }
 
