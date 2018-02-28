@@ -96,7 +96,6 @@ func runReporter(r *report) {
 			r.avgReq += res.reqDuration.Seconds()
 			r.avgRes += res.resDuration.Seconds()
 			if len(r.resLats) < maxRes {
-				r.lats = append(r.lats, res.duration.Seconds())
 				r.connLats = append(r.connLats, res.connDuration.Seconds())
 				r.dnsLats = append(r.dnsLats, res.dnsDuration.Seconds())
 				r.reqLats = append(r.reqLats, res.reqDuration.Seconds())
